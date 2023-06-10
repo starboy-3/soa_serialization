@@ -3,18 +3,21 @@ SOA/hw-1
 
 Для запуска образа выполните следующие команды:
 ```
-docker build -t test_serialization .
-docker run -i -t test_serialization
+docker build . -t starboy369/serialization
+docker run -it starboy369/serialization
 ```
 
 
 Для запуска программы внутри запущенного образа выполните следующую команду:
 ```
-python3 test_serialization.py --file {filename} --test_type {datatype}
+python3 ./run.py           
+Usage: run.py [OPTIONS]
+Try 'run.py --help' for help.
+
+Error: Invalid value for -f': is not one of 'naive', 'avro', 'json', 'pbuffer', 'mpack', 'yaml', 'xml'.
+
+python3 ./run.py -f naive
+naive - sizeof: 244; serialization time: 0.008ms deserialization time: 0.006ms
 ```
 
-{filename} - это путь к JSON-файлу (рекомендуется использовать "data/test.json"), но вы также можете использовать свои файлы.
-
-{datatype} - это формат, который вы хотите протестировать. Возможные значения: "native", "xml", "json", "avro", "yaml".
-
-Программа возвращает количество байт, занимаемых переданной структурой в выбранном формате.
+Программа возвращает количество байт, занимаемых переданной структурой в выбранном формате и скорость сериализации и десериализации.

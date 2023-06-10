@@ -1,98 +1,98 @@
 import json
-import xmltodict
-import dicttoxml
+import pickle
+from abc import abstractmethod, ABC
+
+import msgpack
 import yaml
-import sys
-import argparse
-from avro.schema import make_avsc_object
-from avro.datafile import DataFileWriter
-from avro.io import DatumWriter
+from avro.schema import parse
+from avro.io import DatumReader, DatumWriter, BinaryDecoder, BinaryEncoder
+from io import BytesIO
+from xml_marshaller import xml_marshaller
 
-def json_to_dict(js: json):
-    obj = json.loads(json.dumps(js))
-    return obj
+from google.protobuf.json_format import ParseDict
+from test_data_pb2 import MonaLizaPicture
 
-def dict_to_json(d):
-    s = json.dumps(d)
-    return json.loads(s)
+schema = parse("""
+{
+  "type": "record",
+  "name": "MonaLizaPicture",
+  "fields": [
+    {"name": "id", "type": "int"},
+    {"name": "name", "type": "string"},
+    {"name": "buyers", "type": {"type": "map", "values": "int"}},
+    {"name": "year", "type": "int"},
+    {"name": "size", "type": "float"}
+  ]
+}
+""")
 
-def dict_to_xml(d):
-    xml = dicttoxml.dicttoxml(d)
-    return xml.decode('utf-8')
+class ISerializer(ABC):
+    @abstractmethod
+    def serialize(self, obj):
+        pass
 
-def xml_to_dict(x):
-    return xmltodict.parse(x)
+    @abstractmethod
+    def deserialize(self, obj):
+        pass
 
-def dict_to_yaml(d):
-    return yaml.dump(d)
 
-def dict_to_avro(d):
-    schema_dict = {
-        'namespace': 'example.avro',
-        'name': 'example',
-        'type': 'record',
-        'fields': []
-    }
-    for key in d.keys():
-        field = {
-            'name': key,
-            'type': ['null', type(d[key]).__name__]
-        }
-        schema_dict['fields'].append(field)
-    schema = make_avsc_object(schema_dict)
-    writer = DataFileWriter(open('example.avro', 'wb'), DatumWriter(), schema)
-    writer.append(d)
-    writer.close()
-    return sys.getsizeof(open('example.avro', 'rb').read())
+class AvroSerializer(ISerializer):
+    def serialize(self, obj):
+        writer = DatumWriter(schema)
+        bytes_writer = BytesIO()
+        encoder = BinaryEncoder(bytes_writer)
+        writer.write(obj, encoder)
+        return bytes_writer.getvalue()
 
-def read_json(filename):
-    with open(filename) as f:
-        js = json.load(f)
-    return js
+    def deserialize(self, obj):
+        reader = DatumReader(schema)
+        bytes_reader = BytesIO(obj)
+        decoder = BinaryDecoder(bytes_reader)
+        return reader.read(decoder)
 
-class Solver:
-    def __init__(self, data):
-        self.d = data
+class JSONSerializer(ISerializer):
+    def serialize(self, obj):
+        return json.dumps(obj)
 
-    def get_dict_memory(self):
-        return sys.getsizeof(self.d)
+    def deserialize(self, obj):
+        return json.loads(obj)
 
-    def get_xml_memory(self):
-        return sys.getsizeof(dict_to_xml(self.d))
+class MessagePackSerializer(ISerializer):
+    def serialize(self, obj):
+        return msgpack.packb(obj)
 
-    def get_json_memory(self):
-        return sys.getsizeof(dict_to_json(self.d))
+    def deserialize(self, obj):
+        return msgpack.unpackb(obj)
 
-    def get_yaml_memory(self):
-        return sys.getsizeof(dict_to_yaml(self.d))
+class NaiveSerializer(ISerializer):
+    def serialize(self, obj):
+        return pickle.dumps(obj)
 
-    def get_avro_memory(self):
-        return dict_to_avro(self.d)
+    def deserialize(self, obj):
+        return pickle.loads(obj)
 
-argparser = argparse.ArgumentParser()
-argparser.add_argument(
-    '--file',
-    required=True,
-    help='path to json file for testing'
-)
-argparser.add_argument(
-    '--test_type',
-    required=True,
-    help='type which you want to test ("native", "xml", "json", "avro", "yaml")'
-)
-args = argparser.parse_args()
-filename = args.file
-test_type = args.test_type
-s = Solver(json_to_dict(read_json(filename)))
-if test_type == "native":
-    print(s.get_dict_memory())
-elif test_type == "json":
-    print(s.get_json_memory())
-elif test_type == "xml":
-    print(s.get_xml_memory())
-elif test_type == "yaml":
-    print(s.get_yaml_memory())
-elif test_type == "avro":
-    print(s.get_avro_memory())
-else:
-    print("Sorry, this test_type is not supported now")
+
+class ProtoSerializer(ISerializer):
+    def serialize(self, obj):
+        scheme = MonaLizaPicture()
+        ParseDict(obj, scheme)
+        return scheme.SerializeToString()
+
+    def deserialize(self, obj):
+        deserialized_obj = MonaLizaPicture()
+        deserialized_obj.ParseFromString(obj)
+        return deserialized_obj
+
+class YAMLSerializer(ISerializer):
+    def serialize(self, obj):
+        return yaml.dump(obj)
+
+    def deserialize(self, obj):
+        return yaml.load(obj, Loader=yaml.Loader)
+
+class XMLSerializer:
+    def serialize(self, obj):
+        return xml_marshaller.dumps(obj)
+
+    def deserialize(self, obj):
+        return xml_marshaller.loads(obj, )

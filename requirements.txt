@@ -1,9 +1,0 @@
-dicttoxml
-xmltodict
-beautifulsoup4
-lxml
-pyyaml
-rec-avro
-avro
-dataclasses-avroschema
-typing_extensions
