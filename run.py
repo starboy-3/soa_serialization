@@ -1,10 +1,10 @@
+import os
+import socket
 import string
 import sys
 import time
 import click
 import random
-from worker import *
-
 
 r = random.Random()
 
@@ -29,22 +29,47 @@ def randomword(length):
    letters = string.ascii_lowercase
    return ''.join(random.choice(letters) for _ in range(length))
 
-MAPPING = {
-    "naive": NaiveSerializer(),
-    "avro": AvroSerializer(),
-    "json": JSONSerializer(),
-    "pbuffer": ProtoSerializer(),
-    "mpack": MessagePackSerializer(),
-    "yaml": YAMLSerializer(),
-    "xml": XMLSerializer()
-}
+def get_serializer(format_name):
+    match format_name:
+        case 'naive':
+            from naive_serializer import NaiveSerializer
+            serializer = NaiveSerializer()
+        case 'avro':
+            from avro_serializer import AvroSerializer
+            serializer = AvroSerializer()
+        case 'json':
+            from json_serializer import JSONSerializer
+            serializer = JSONSerializer()
+        case 'pbuffer':
+            from protobuf_serializer import ProtoSerializer
+            serializer = ProtoSerializer()
+        case 'mpack':
+            from mpack_serializer import MessagePackSerializer
+            serializer = MessagePackSerializer()
+        case 'yaml':
+            from yaml_serializer import YAMLSerializer
+            serializer = YAMLSerializer()
+        case 'xml':
+            from xml_serializer import XMLSerializer
+            serializer = XMLSerializer()
+    return serializer
+
+FORMATS = [
+    "naive",
+    "avro",
+    "json",
+    "pbuffer",
+    "mpack",
+    "yaml",
+    "xml"
+]
 
 
 @click.command()
-@click.option('--format', '-f', required=True, type=click.Choice(MAPPING.keys()))
+@click.option('--format', '-f', required=True, type=click.Choice(FORMATS))
 def main(format):
     data = generate_data()
-    serializer = MAPPING.get(format)
+    serializer = get_serializer(format)
     start_time = time.time()
     serialized_data = serializer.serialize(data)
     serialization_time = time.time() - start_time
@@ -52,8 +77,18 @@ def main(format):
     start_time = time.time()
     _ = serializer.deserialize(serialized_data)
     deserialization_time = time.time() - start_time
-
-    print(f"{format} - sizeof: {sys.getsizeof(serialized_data)}; serialization time: {serialization_time * 1000:.3f}ms deserialization time: {deserialization_time * 1000:.3f}ms")
+    click.echo(f"""
+    {format}
+    sizeof - {sys.getsizeof(serialized_data)}
+    serialization time: {serialization_time * 1000:.3f}ms
+    {deserialization_time * 1000:.3f}ms
+    """)
 
 if __name__ == '__main__':
-    main()
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server_socket.bind(('0.0.0.0', int(os.environ.get(f'SERVER_PORT'))))
+
+    while True:
+        request, back = server_socket.recvfrom(1024)
+        response = main()
+        server_socket.sendto(response.encode(), back)

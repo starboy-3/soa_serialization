@@ -1,23 +1,34 @@
 SOA/hw-1
 Сериализация и десериализация различных форматов данных
 
-Для запуска образа выполните следующие команды:
+Для запуска контейнера выполните следующие команды:
 ```
-docker build . -t starboy369/serialization
-docker run -it starboy369/serialization
+docker-compose build && docker-compose up
 ```
-
 
 Для запуска программы внутри запущенного образа выполните следующую команду:
 ```
-python3 ./run.py           
-Usage: run.py [OPTIONS]
-Try 'run.py --help' for help.
+echo "time naive" | nc -u localhost 8080
+```
+Вместо naive можно передавать любой формат из этих
+    "naive",
+    "avro",
+    "json",
+    "pbuffer",
+    "mpack",
+    "yaml",
+    "xml"
 
-Error: Invalid value for -f': is not one of 'naive', 'avro', 'json', 'pbuffer', 'mpack', 'yaml', 'xml'.
 
-python3 ./run.py -f naive
-naive - sizeof: 244; serialization time: 0.008ms deserialization time: 0.006ms
+И контейнер ответит
+```
+serialization-naive_serializer-1     |     naive
+serialization-naive_serializer-1     |     sizeof - 244
+serialization-naive_serializer-1     |     serialization time: 0.010ms
+serialization-naive_serializer-1     |     0.007ms
 ```
 
 Программа возвращает количество байт, занимаемых переданной структурой в выбранном формате и скорость сериализации и десериализации.
+
+Результат работы
+![img_1.png](img_1.png)

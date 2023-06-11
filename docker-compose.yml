@@ -1,0 +1,102 @@
+version: '3'
+
+services:
+  proxy_server:
+    build:
+      context: .
+      dockerfile: proxy_server.dockerfile
+    ports:
+      - "8080:8080/udp"
+    depends_on:
+      - avro_serializer
+      - json_serializer
+      - mpack_serializer
+      - naive_serializer
+      - protobuf_serializer
+      - xml_serializer
+      - yaml_serializer
+    environment:
+      AVRO_PORT: "8081"
+      AVRO_NAME: "avro_serializer"
+      JSON_PORT: "8082"
+      JSON_NAME: "json_serializer"
+      MPACK_PORT: "8083"
+      MPACK_NAME: "mpack_serializer"
+      NAIVE_PORT: "8084"
+      NAIVE_NAME: "naive_serializer"
+      PBUFFER_PORT: "8085"
+      PBUFFER_NAME: "pbuffer_serializer"
+      XML_PORT: "8086"
+      XML_NAME: "xml_serializer"
+      YAML_PORT: "8087"
+      YAML_NAME: "yaml_serializer"
+
+  avro_serializer:
+    build:
+      context: .
+      dockerfile: ./avro.dockerfile
+    ports:
+      - "8081:8081/udp"
+    environment:
+      SERVER_NAME: "avro_serializer"
+      SERVER_PORT: "8081"
+
+  json_serializer:
+    build:
+      context: .
+      dockerfile: ./json.dockerfile
+    ports:
+      - "8082:8082/udp"
+    environment:
+      SERVER_NAME: "json_serializer"
+      SERVER_PORT: "8082"
+
+  mpack_serializer:
+    build:
+      context: .
+      dockerfile: ./mpack.dockerfile
+    ports:
+      - "8083:8083/udp"
+    environment:
+      SERVER_NAME: "mpack_serializer"
+      SERVER_PORT: "8083"
+
+  naive_serializer:
+    build:
+      context: .
+      dockerfile: ./naive.dockerfile
+    ports:
+      - "8084:8084/udp"
+    environment:
+      SERVER_NAME: "naive_serializer"
+      SERVER_PORT: "8084"
+
+  protobuf_serializer:
+    build:
+      context: .
+      dockerfile: ./pbuffer.dockerfile
+    ports:
+      - "8085:8085/udp"
+    environment:
+      SERVER_NAME: "pbuffer_serializer"
+      SERVER_PORT: "8085"
+
+  xml_serializer:
+    build:
+      context: .
+      dockerfile: ./xml.dockerfile
+    ports:
+      - "8086:8086/udp"
+    environment:
+      SERVER_NAME: "xml_serializer"
+      SERVER_PORT: "8086"
+
+  yaml_serializer:
+    build:
+      context: .
+      dockerfile: ./yaml.dockerfile
+    ports:
+      - "8087:8087/udp"
+    environment:
+      SERVER_NAME: "yaml_serializer"
+      SERVER_PORT: "8087"
