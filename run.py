@@ -1,3 +1,4 @@
+import argparse
 import os
 import socket
 import string
@@ -64,9 +65,6 @@ FORMATS = [
     "xml"
 ]
 
-
-@click.command()
-@click.option('--format', '-f', required=True, type=click.Choice(FORMATS))
 def main(format):
     data = generate_data()
     serializer = get_serializer(format)
@@ -77,18 +75,24 @@ def main(format):
     start_time = time.time()
     _ = serializer.deserialize(serialized_data)
     deserialization_time = time.time() - start_time
-    click.echo(f"""
+
+    return f"""
     {format}
     sizeof - {sys.getsizeof(serialized_data)}
     serialization time: {serialization_time * 1000:.3f}ms
-    {deserialization_time * 1000:.3f}ms
-    """)
+    deserialization time: {deserialization_time * 1000:.3f}ms
+    """
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--format', required=True, choices=FORMATS, dest='format_name', help='The format of the data')
+    args = parser.parse_args()
+    format_name = args.format_name
+
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server_socket.bind(('0.0.0.0', int(os.environ.get(f'SERVER_PORT'))))
 
     while True:
         request, back = server_socket.recvfrom(1024)
-        response = main()
+        response = main(format_name)
         server_socket.sendto(response.encode(), back)

@@ -1,5 +1,6 @@
 from google.protobuf.json_format import ParseDict
 from test_data_pb2 import MonaLizaPicture
+from interface import ISerializer
 
 class ProtoSerializer(ISerializer):
     def serialize(self, obj):

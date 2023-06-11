@@ -6,29 +6,29 @@ services:
       context: .
       dockerfile: proxy_server.dockerfile
     ports:
-      - "8080:8080/udp"
+      - "2000:2000/udp"
     depends_on:
       - avro_serializer
       - json_serializer
       - mpack_serializer
       - naive_serializer
-      - protobuf_serializer
+      - pbuffer_serializer
       - xml_serializer
       - yaml_serializer
     environment:
-      AVRO_PORT: "8081"
+      AVRO_PORT: "2001"
       AVRO_NAME: "avro_serializer"
-      JSON_PORT: "8082"
+      JSON_PORT: "2002"
       JSON_NAME: "json_serializer"
-      MPACK_PORT: "8083"
+      MPACK_PORT: "2003"
       MPACK_NAME: "mpack_serializer"
-      NAIVE_PORT: "8084"
+      NAIVE_PORT: "2004"
       NAIVE_NAME: "naive_serializer"
-      PBUFFER_PORT: "8085"
+      PBUFFER_PORT: "2005"
       PBUFFER_NAME: "pbuffer_serializer"
-      XML_PORT: "8086"
+      XML_PORT: "2006"
       XML_NAME: "xml_serializer"
-      YAML_PORT: "8087"
+      YAML_PORT: "2007"
       YAML_NAME: "yaml_serializer"
 
   avro_serializer:
@@ -36,67 +36,67 @@ services:
       context: .
       dockerfile: ./avro.dockerfile
     ports:
-      - "8081:8081/udp"
+      - "2001:2001/udp"
     environment:
       SERVER_NAME: "avro_serializer"
-      SERVER_PORT: "8081"
+      SERVER_PORT: "2001"
 
   json_serializer:
     build:
       context: .
       dockerfile: ./json.dockerfile
     ports:
-      - "8082:8082/udp"
+      - "2002:2002/udp"
     environment:
       SERVER_NAME: "json_serializer"
-      SERVER_PORT: "8082"
+      SERVER_PORT: "2002"
 
   mpack_serializer:
     build:
       context: .
       dockerfile: ./mpack.dockerfile
     ports:
-      - "8083:8083/udp"
+      - "2003:2003/udp"
     environment:
       SERVER_NAME: "mpack_serializer"
-      SERVER_PORT: "8083"
+      SERVER_PORT: "2003"
 
   naive_serializer:
     build:
       context: .
       dockerfile: ./naive.dockerfile
     ports:
-      - "8084:8084/udp"
+      - "2004:2004/udp"
     environment:
       SERVER_NAME: "naive_serializer"
-      SERVER_PORT: "8084"
+      SERVER_PORT: "2004"
 
-  protobuf_serializer:
+  pbuffer_serializer:
     build:
       context: .
       dockerfile: ./pbuffer.dockerfile
     ports:
-      - "8085:8085/udp"
+      - "2005:2005/udp"
     environment:
       SERVER_NAME: "pbuffer_serializer"
-      SERVER_PORT: "8085"
+      SERVER_PORT: "2005"
 
   xml_serializer:
     build:
       context: .
       dockerfile: ./xml.dockerfile
     ports:
-      - "8086:8086/udp"
+      - "2006:2006/udp"
     environment:
       SERVER_NAME: "xml_serializer"
-      SERVER_PORT: "8086"
+      SERVER_PORT: "2006"
 
   yaml_serializer:
     build:
       context: .
       dockerfile: ./yaml.dockerfile
     ports:
-      - "8087:8087/udp"
+      - "2007:2007/udp"
     environment:
       SERVER_NAME: "yaml_serializer"
-      SERVER_PORT: "8087"
+      SERVER_PORT: "2007"
