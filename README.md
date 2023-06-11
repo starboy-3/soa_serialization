@@ -8,7 +8,7 @@ docker-compose build && docker-compose up
 
 Для запуска программы внутри запущенного образа выполните следующую команду:
 ```
-echo "get_result naive" | nc -u localhost 200
+echo "get_result naive" | nc -u localhost 2000
 ```
 Вместо naive можно передавать любой формат из этих
     "all" - для всех форматов, 
@@ -23,10 +23,10 @@ echo "get_result naive" | nc -u localhost 200
 
 И контейнер ответит
 ```
-serialization-naive_serializer-1     |     naive
-serialization-naive_serializer-1     |     sizeof - 244
-serialization-naive_serializer-1     |     serialization time: 0.010ms
-serialization-naive_serializer-1     |     0.007ms
+    naive
+    sizeof - 243
+    serialization time: 0.010ms
+    deserialization time: 0.010ms
 ```
 
 Программа возвращает количество байт, занимаемых переданной структурой в выбранном формате и скорость сериализации и десериализации.
